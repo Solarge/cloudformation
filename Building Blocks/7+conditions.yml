@@ -12,7 +12,7 @@ Parameters:
   InstanceType:
     Description: WebServer EC2 instance type
     Type: AWS::SSM::Parameter::Value<String>
-    Default: /jjtech/ec2/instancetype
+    Default: /solarge/ec2/instancetype
     ConstraintDescription: must be a valid EC2 instance type.
 
   AMIID:

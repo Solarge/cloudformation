@@ -1,19 +1,16 @@
-# In this template we are going to learn about resources
-# Use of resources
-# Why resources are mandatory
-# How to search the documentation of resources while writing cloudformation templates
-# Ref: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
-# Ref: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html
+# In this template we are going to learn about DependsOn usage while creting cloudformation
+# Ref: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-attribute-dependson.html
+# Ref: https://stackoverflow.com/questions/21985994/aws-cloud-formation-is-it-possible-to-use-multiple-dependson
 
 ---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Cloudformation template to create EC2 instance'
+Description: 'Cloudformation template to create EC2 instance with parameteres'
 Parameters:
   InstanceType:
-    Description: WebServer EC2 instance type
-    Type: AWS::SSM::Parameter::Value<String>
-    Default: /solarge/ec2/instancetype
-    ConstraintDescription: must be a valid EC2 instance type.
+      Description: WebServer EC2 instance type
+      Type: AWS::SSM::Parameter::Value<String>
+      Default: /jjtech/ec2/instancetype     
+      ConstraintDescription: must be a valid EC2 instance type.
 
   AMIID:
     Description: The EC2 AMI id
@@ -32,15 +29,15 @@ Parameters:
   KeyName:
     Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
     Type: AWS::EC2::KeyPair::KeyName
-    ConstraintDescription: must be the name of an existing EC2 KeyPair.
-
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.  
+  
   SecurityGroupPorts:
     Description: Simple Description of a Number Parameter, with MinValue and MaxValue
     Type: Number
-    AllowedValues:
+    AllowedValues: 
       - 80
       - 443
-      - 22
+      - 22    
 
   SSHLocation:
     Description: The IP address range that can be used to SSH to the EC2 instances
@@ -60,58 +57,66 @@ Resources:
       InstanceType:
         Ref: InstanceType
       SecurityGroups:
-        - Ref: InstanceSecurityGroup
+      - Ref: InstanceSecurityGroup
       KeyName:
-        Ref: KeyName
+        Ref: KeyName      
       BlockDeviceMappings:
         -
           DeviceName: /dev/xvda
           Ebs:
-            VolumeType: gp2
+            VolumeType: gp2            
             DeleteOnTermination: true
             VolumeSize: !Ref VolumeSize
-
-  InstanceElasticIP:
+    DependsOn: S3Bucket
+  
+  InstanceElasticIP:    
     Type: AWS::EC2::EIP
     Properties:
       InstanceId: !Ref EC2Instance
-
+  
   InstanceSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Enable SSH access via port 22
       SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: !Ref SecurityGroupPorts
-          ToPort: !Ref SecurityGroupPorts
-          CidrIp:
-            Ref: SSHLocation
-
+      - IpProtocol: tcp
+        FromPort: !Ref SecurityGroupPorts
+        ToPort: !Ref SecurityGroupPorts
+        CidrIp:
+          Ref: SSHLocation
+    
   S3Bucket:
     Type: AWS::S3::Bucket
 
 Outputs:
   InstanceDetails:
     Description: "EC2 Instance details"
-    Value:
+    Value: 
       Ref : EC2Instance
   AZ:
     Description: Availability Zone of the newly created EC2 instance
-    Value: !GetAtt
+    Value: !GetAtt 
       - EC2Instance
       - AvailabilityZone
   PublicDNS:
     Description: Public DNSName of the newly created EC2 instance
-    Value: !GetAtt
+    Value: !GetAtt 
       - EC2Instance
       - PublicDnsName
+    Export:
+      Name: EC2InstancePublicDNS
   PublicIP:
     Description: Public IP address of the newly created EC2 instance
-    Value: !GetAtt
+    Value: !GetAtt 
       - EC2Instance
       - PublicIp
+    Export:
+      Name: EC2InstancePublicIP
+
   SecurityGroupId:
     Description: Public IP address of the newly created EC2 instance
-    Value: !GetAtt
+    Value: !GetAtt 
       - InstanceSecurityGroup
       - GroupId
+    Export:
+      Name: MySecurityGroupId

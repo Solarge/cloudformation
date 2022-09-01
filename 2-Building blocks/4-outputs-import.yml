@@ -10,7 +10,7 @@ Parameters:
   InstanceType:
     Description: WebServer EC2 instance type
     Type: AWS::SSM::Parameter::Value<String>
-    Default: /solarge/ec2/instancetype
+    Default: /jjtech/ec2/instancetype     
     ConstraintDescription: must be a valid EC2 instance type.
 
   AMIID:
@@ -30,7 +30,7 @@ Parameters:
   KeyName:
     Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
     Type: AWS::EC2::KeyPair::KeyName
-    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.  
 
 Resources:
   EC2Instance:
@@ -41,14 +41,14 @@ Resources:
       InstanceType:
         Ref: InstanceType
       SecurityGroupIds:
-        - !ImportValue WebSeverSecurityGroupId # Fn::ImportValue
+      - !ImportValue WebSeverSecurityGroupId # Fn::ImportValue
       KeyName:
-        Ref: KeyName
+        Ref: KeyName      
       BlockDeviceMappings:
         -
           DeviceName: /dev/xvda
           Ebs:
-            VolumeType: gp2
+            VolumeType: gp2            
             DeleteOnTermination: true
             VolumeSize: !Ref VolumeSize
 
